@@ -217,6 +217,7 @@ const AddResource = () => {
             {/* Final Action */}
             <button 
               type="submit"
+              onClick={() => handleSave()}
               className="w-full bg-white text-black font-black py-6 rounded-[2.5rem] hover:bg-[#ba8ffa] hover:shadow-[0_20px_60px_rgba(186,143,250,0.4)] transition-all duration-700 flex items-center justify-center gap-4 text-xl group overflow-hidden relative"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />

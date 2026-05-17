@@ -146,7 +146,7 @@ const Dashboard = () => {
           {/* Resources Section */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-6">
-              {['All', 'Articles', 'Videos', 'Courses', 'PDFs'].map(tab => (
+              {['All', 'Articles', 'Videos', 'Courses', 'PDFs', 'Tools'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -156,10 +156,12 @@ const Dashboard = () => {
                 </button>
               ))}
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all">
+
+            {/* TO-DO: enhancement in production */}
+            {/* <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all">
               <Filter size={18} />
               <span>Filter</span>
-            </button>
+            </button> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -173,12 +175,15 @@ const Dashboard = () => {
               <ResourceCard key={res.id} {...res} />
             )) : activeTab === "PDFs" ? resources.filter(res => res.type === "PDF").map(res => (
               <ResourceCard key={res.id} {...res} />
+            )) : activeTab === "Tools" ? resources.filter(res => res.type === "Tool").map(res => (
+              <ResourceCard key={res.id} {...res} />
             )) : null}
           </div>
         </div>
 
+        {/* TO-DO: implement clipboard suggestion in production when backend is added */}
         {/* Clipboard Suggestion Toast */}
-        {clipboardLink && (
+        {/* {clipboardLink && (
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-10 duration-700">
             <div className="bg-[#121212]/80 backdrop-blur-3xl border border-[#ba8ffa]/30 p-5 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-6 max-w-xl">
               <div className="w-12 h-12 rounded-2xl bg-[#ba8ffa]/10 flex items-center justify-center text-[#ba8ffa]">
@@ -204,7 +209,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </main>
     </div>
   );

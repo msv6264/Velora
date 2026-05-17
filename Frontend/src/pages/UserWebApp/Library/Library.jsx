@@ -113,15 +113,22 @@ const Library = () => {
 
         {/* Resource Content */}
         <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
-          {resources.map((res) => (
-            viewMode === 'grid' ? (
-              <div key={res.id} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/10 transition-all duration-500 group relative">
-                <div className={`w-12 h-1.5 rounded-full ${res.color} mb-6`} />
-                <div className="flex justify-between items-start mb-4">
-                   <div className="p-3 rounded-xl bg-white/5 text-gray-400 group-hover:text-[#ba8ffa] transition-colors">
-                     {res.icon}
-                   </div>
-                   <div className="relative">
+          {resources
+            .filter(res => {
+              if (filter === 'All') return true;
+              // Handle plural vs singular (Articles -> Article, etc.)
+              const typeFilter = filter.endsWith('s') && filter !== 'PDFs' ? filter.slice(0, -1) : filter === 'PDFs' ? 'PDF' : filter;
+              return res.type === typeFilter;
+            })
+            .map((res) => (
+              viewMode === 'grid' ? (
+                <div key={res.id} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/10 transition-all duration-500 group relative">
+                  <div className={`w-12 h-1.5 rounded-full ${res.color} mb-6`} />
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 rounded-xl bg-white/5 text-gray-400 group-hover:text-[#ba8ffa] transition-colors">
+                      {res.icon}
+                    </div>
+                    <div className="relative">
                       <button 
                         onClick={(e) => toggleMenu(e, res.id)}
                         className={`p-2 rounded-xl transition-all ${activeMenu === res.id ? 'bg-[#ba8ffa] text-black' : 'text-gray-600 hover:text-white hover:bg-white/5'}`}
@@ -142,68 +149,68 @@ const Library = () => {
                           </button>
                         </div>
                       )}
-                   </div>
-                </div>
-                <h3 className="text-xl font-bold mb-4 tracking-tight leading-snug group-hover:text-[#ba8ffa] transition-colors h-14 line-clamp-2">{res.title}</h3>
-                
-                {/* Collection Badge */}
-                <div className="flex items-center gap-2 mb-6 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 w-fit">
-                  <FolderOpen size={14} className="text-[#8791fe]" />
-                  <span className="text-xs text-gray-400 font-medium">{res.collection}</span>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <span className="text-[10px] uppercase tracking-[0.15em] text-gray-500 font-bold">{res.type}</span>
-                  <span className="text-xs text-gray-600 font-spectral italic">{res.date}</span>
-                </div>
-              </div>
-            ) : (
-              <div key={res.id} className="flex items-center gap-6 p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group">
-                <div className={`p-3 rounded-xl bg-white/5 ${res.color.replace('bg-', 'text-')} group-hover:scale-110 transition-all`}>
-                  {res.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-bold truncate group-hover:text-[#ba8ffa] transition-colors">{res.title}</h3>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#8791fe]/10 border border-[#8791fe]/20">
-                      <FolderOpen size={10} className="text-[#8791fe]" />
-                      <span className="text-[10px] text-[#8791fe] font-bold uppercase">{res.collection}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 mt-1">
-                    <span className="text-[10px] uppercase tracking-wider text-gray-600 font-bold">{res.type}</span>
-                    <span className="text-[10px] text-gray-700 italic font-spectral">• {res.date}</span>
+                  <h3 className="text-xl font-bold mb-4 tracking-tight leading-snug group-hover:text-[#ba8ffa] transition-colors h-14 line-clamp-2">{res.title}</h3>
+                  
+                  {/* Collection Badge */}
+                  <div className="flex items-center gap-2 mb-6 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 w-fit">
+                    <FolderOpen size={14} className="text-[#8791fe]" />
+                    <span className="text-xs text-gray-400 font-medium">{res.collection}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-gray-500 font-bold">{res.type}</span>
+                    <span className="text-xs text-gray-600 font-spectral italic">{res.date}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button className="p-2 text-gray-600 hover:text-[#ba8ffa] transition-colors">
-                    <ExternalLink size={18} />
-                  </button>
-                  <div className="relative">
-                    <button 
-                      onClick={(e) => toggleMenu(e, res.id)}
-                      className={`p-2 rounded-xl transition-all ${activeMenu === res.id ? 'bg-[#ba8ffa] text-black' : 'text-gray-600 hover:text-white'}`}
-                    >
-                      <MoreVertical size={18} />
-                    </button>
-                    {/* List View Dropdown */}
-                    {activeMenu === res.id && (
-                      <div className="absolute right-0 mt-2 w-48 bg-[#121212] border border-white/10 rounded-2xl p-2 shadow-2xl z-50 backdrop-blur-3xl animate-in fade-in zoom-in duration-200">
-                        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-all group/item">
-                          <Pencil size={16} />
-                          <span className="text-sm font-medium">Edit</span>
-                        </button>
-                        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-red-500/10 hover:text-red-500 transition-all group/item">
-                          <Trash2 size={16} />
-                          <span className="text-sm font-medium">Delete</span>
-                        </button>
+              ) : (
+                <div key={res.id} className="flex items-center gap-6 p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group">
+                  <div className={`p-3 rounded-xl bg-white/5 ${res.color.replace('bg-', 'text-')} group-hover:scale-110 transition-all`}>
+                    {res.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-bold truncate group-hover:text-[#ba8ffa] transition-colors">{res.title}</h3>
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#8791fe]/10 border border-[#8791fe]/20">
+                        <FolderOpen size={10} className="text-[#8791fe]" />
+                        <span className="text-[10px] text-[#8791fe] font-bold uppercase">{res.collection}</span>
                       </div>
-                    )}
+                    </div>
+                    <div className="flex items-center gap-4 mt-1">
+                      <span className="text-[10px] uppercase tracking-wider text-gray-600 font-bold">{res.type}</span>
+                      <span className="text-[10px] text-gray-700 italic font-spectral">• {res.date}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button className="p-2 text-gray-600 hover:text-[#ba8ffa] transition-colors">
+                      <ExternalLink size={18} />
+                    </button>
+                    <div className="relative">
+                      <button 
+                        onClick={(e) => toggleMenu(e, res.id)}
+                        className={`p-2 rounded-xl transition-all ${activeMenu === res.id ? 'bg-[#ba8ffa] text-black' : 'text-gray-600 hover:text-white'}`}
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+                      {/* List View Dropdown */}
+                      {activeMenu === res.id && (
+                        <div className="absolute right-0 mt-2 w-48 bg-[#121212] border border-white/10 rounded-2xl p-2 shadow-2xl z-50 backdrop-blur-3xl animate-in fade-in zoom-in duration-200">
+                          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-all group/item">
+                            <Pencil size={16} />
+                            <span className="text-sm font-medium">Edit</span>
+                          </button>
+                          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-red-500/10 hover:text-red-500 transition-all group/item">
+                            <Trash2 size={16} />
+                            <span className="text-sm font-medium">Delete</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )
-          ))}
+              )
+            ))}
         </div>
       </div>
     </div>
