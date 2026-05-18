@@ -1,0 +1,55 @@
+@import "tailwindcss";
+@source "../../src/components";
+@source "../../src/views";
+
+@theme inline {
+  --font-outfit: "Outfit", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-spectral: "Spectral", serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #ba8ffa, #8791fe);
+  border-radius: 20px;
+  border: 3px solid #030303;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #d8b4fe, #a5b4fc);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ba8ffa #030303;
+}
+
+/* Text Selection */
+::selection {
+  background: rgba(186, 143, 250, 0.3);
+  color: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base Styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #030303;
+  color: white;
+  overflow-x: hidden;
+}
