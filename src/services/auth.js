@@ -40,10 +40,15 @@ export async function logoutUser() {
 
 export async function getUserData() {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user ?? null;
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      console.error(error);
+      return null;
+    }
+    console.log(data);
+    return data?.user || null;
+     
   } catch (error) {
     console.error(error);
     return null;

@@ -31,8 +31,9 @@ const Dashboard = () => {
   // fetching user name to greet user
   useEffect(() => {
     const fetchUser = async () => {
-      const userData = await getUserData();
-      setUserName(userData?.user_metadata?.username);
+      const user = await getUserData();
+      const userName = user?.user_metadata?.username;
+      setUserName(userName);
     };
 
     fetchUser();
@@ -235,7 +236,7 @@ const Dashboard = () => {
               />
             </button>
             <div className="w-12 h-12 rounded-2xl bg-[#8791fe]/20 border border-[#8791fe]/30 flex items-center justify-center text-[#8791fe] font-bold">
-              VS
+              {userName?.[0]?.toUpperCase() || "V"}
             </div>
           </div>
         </header>
