@@ -46,7 +46,6 @@ export async function getUserData() {
       console.error(error);
       return null;
     }
-    console.log(data);
     return data?.user || null;
      
   } catch (error) {
