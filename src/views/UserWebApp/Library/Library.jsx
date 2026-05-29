@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getResources, updateResource } from "../../../services/resources";
+import { deleteResource, getResources, updateResource } from "../../../services/resources";
+import toast from "react-hot-toast";
+import DeleteDialog from "../../../components/DeleteDialog";
 
 import {
   Search,
@@ -31,11 +33,12 @@ const Library = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [resources, setResources] = useState({});
   const [editingResource, setEditingResource] = useState(null);
+  const [resourceToDelete, setResourceToDelete] = useState(null);
 
   useEffect(() => {
     const fetchResources = async () => {
       const response = await getResources();
-      console.log(response.data);
+      // console.log(response.data);
       if (response.data) {
         const resourceMap = response.data.reduce((acc, item) => {
           acc[item.id] = item;
@@ -76,6 +79,11 @@ const Library = () => {
   };
 
   const handleSave = async () => {
+    if (!editingResource.title?.trim() || !editingResource.url?.trim()) {
+      toast.error("Please provide both a title and a URL.");
+      return;
+    }
+
     try {
       // Prevent modifying primary key and immutable fields
       const { id, user_id, created_at, ...updatePayload } = editingResource;
@@ -93,6 +101,23 @@ const Library = () => {
       console.error("Update failed", error);
     }
   };
+
+  const handleDelete = async (resId) => {
+    const response = await deleteResource(resId);
+
+    if (response){
+      setResources((prev) => {
+        const next = { ...prev };
+        delete next[resId];
+        return next;
+      });
+      toast.success("Resource deleted successfully");
+    } else {
+      console.log("Error in deleting resource: ", response);
+      toast.error("Failed to delete resource");
+    }
+    setResourceToDelete(null);
+  }
 
   return (
     <div
@@ -269,7 +294,7 @@ const Library = () => {
                                 Edit Resource
                               </span>
                             </button>
-                            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-red-500/10 hover:text-red-500 transition-all group/item">
+                            <button onClick={() => setResourceToDelete(res.id)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-red-500/10 hover:text-red-500 transition-all group/item cursor-pointer">
                               <Trash2
                                 size={16}
                                 className="group-hover/item:text-red-500"
@@ -363,7 +388,7 @@ const Library = () => {
                               <Pencil size={16} />
                               <span className="text-sm font-medium">Edit</span>
                             </button>
-                            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-red-500/10 hover:text-red-500 transition-all group/item">
+                            <button onClick={() => setResourceToDelete(res.id)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-red-500/10 hover:text-red-500 transition-all group/item cursor-pointer">
                               <Trash2 size={16} />
                               <span className="text-sm font-medium">
                                 Delete
@@ -410,7 +435,10 @@ const Library = () => {
             <div className="p-6 space-y-6">
               <div className="space-y-3">
                 <label className="text-[10px] font-bold text-[#8791fe] uppercase tracking-[0.2em] px-1">
-                  Title
+                  Title{" "}
+                  <span className="text-red-500 ml-1 italic normal-case font-medium opacity-70">
+                    * Required
+                  </span>
                 </label>
                 <div className="relative group">
                   <Type
@@ -433,7 +461,10 @@ const Library = () => {
 
               <div className="space-y-3">
                 <label className="text-[10px] font-bold text-[#8791fe] uppercase tracking-[0.2em] px-1">
-                  URL
+                  URL{" "}
+                  <span className="text-red-500 ml-1 italic normal-case font-medium opacity-70">
+                    * Required
+                  </span>
                 </label>
                 <div className="relative group">
                   <ExternalLink
@@ -526,7 +557,12 @@ const Library = () => {
             <div className="p-6 border-t border-white/5 bg-white/[0.02]">
               <button
                 onClick={async () => handleSave()}
-                className="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-[#ba8ffa] hover:shadow-[0_10px_30px_rgba(186,143,250,0.4)] transition-all duration-500 flex items-center justify-center gap-3 text-lg group"
+                disabled={!editingResource.title?.trim() || !editingResource.url?.trim()}
+                className={`w-full font-black py-4 rounded-2xl transition-all duration-500 flex items-center justify-center gap-3 text-lg group ${
+                  editingResource.title?.trim() && editingResource.url?.trim()
+                    ? "bg-white text-black hover:bg-[#ba8ffa] hover:shadow-[0_10px_30px_rgba(186,143,250,0.4)] cursor-pointer"
+                    : "bg-white/10 text-gray-600 cursor-not-allowed border border-white/5"
+                }`}
               >
                 <span>Save Changes</span>
                 <Save
@@ -538,6 +574,15 @@ const Library = () => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        isOpen={!!resourceToDelete}
+        onClose={() => setResourceToDelete(null)}
+        onConfirm={() => handleDelete(resourceToDelete)}
+        title="Delete Resource"
+        message="Are you sure you want to delete this resource? This action cannot be undone."
+      />
     </div>
   );
 };

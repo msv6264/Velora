@@ -63,9 +63,24 @@ export async function updateResource(resourceId, resourceData) {
 }
 
 export async function deleteResource(resourceId) {
+    console.log('I am in backend function deleteResource was called :>');
     try {
-        
-    } catch (error) {
-        
+        const user_id = (await supabase.auth.getUser()).data.user.id;
+
+        const { data, error } = await supabase
+            .from('resources')
+            .delete()
+            .eq('id', resourceId)
+            .select();
+
+        if (error) {
+            return { error: error };
+        } else {
+            return { data: data };
+        }
+
+    } catch (err) {
+        console.error(err);
+        return { data: null, error: err };
     }
 }
