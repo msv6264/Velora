@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { createResource } from "../../../services/resources";
+import toast from "react-hot-toast";
 
 import NeuralBg from "../../../components/NeuralBg";
 const logo = "/logo.png";
@@ -28,12 +29,16 @@ const AddResource = () => {
   // State
   const [isScanning, setIsScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     url: "",
     title: "",
     category: "Article",
     collection: "",
   });
+
+  const isFormValid =
+    formData.url.trim() !== "" && formData.title.trim() !== "";
 
   // Categories with matching icons
   const categories = [
@@ -93,24 +98,34 @@ const AddResource = () => {
   }, [location]);
 
   const handleSave = async (e) => {
-    console.log(formData);
+    if (e) e.preventDefault();
 
-    const response = await createResource({
-      title: formData.title,
-      url: formData.url,
-      category: formData.category,
-      collection: formData.collection,
-    });
-
-    if(handleSave){
-      console.log("resource created successfully", response.data);
-    } else{
-      console.log("error", handleSave.error);
+    if (!formData.title.trim() || !formData.url.trim()) {
+      toast.error("Please provide both a title and a URL.");
+      return;
     }
 
-    console.log("response from lib: ", response);
+    setIsSubmitting(true);
+    try {
+      const response = await createResource({
+        title: formData.title,
+        url: formData.url,
+        category: formData.category,
+        collection: formData.collection,
+      });
 
-    router.push("/dashboard");
+      if (response?.error) {
+        toast.error(response.error.message || "Failed to create resource. Please try again.");
+      } else {
+        toast.success("Resource created successfully!");
+        router.push("/library");
+      }
+    } catch (error) {
+      console.error("error", error);
+      toast.error(error.message || "An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -123,8 +138,8 @@ const AddResource = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <button
-            onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-3 text-gray-500 hover:text-white transition-all group"
+            onClick={() => router.push("/library")}
+            className="flex cursor-pointer items-center gap-3 text-gray-500 hover:text-white transition-all group"
           >
             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 group-hover:border-white/20 transition-all">
               <ArrowLeft
@@ -133,7 +148,7 @@ const AddResource = () => {
               />
             </div>
             <span className="font-bold tracking-tight uppercase text-[10px] tracking-[0.2em]">
-              Exit to Dashboard
+              Exit to Library
             </span>
           </button>
 
@@ -153,18 +168,15 @@ const AddResource = () => {
 
         {/* Form Card */}
         <div className="bg-white/[0.02] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-12 shadow-[0_25px_100px_rgba(0,0,0,0.5)]">
-          <form
-            className="space-y-10"
-            onSubmit={(e) => {
-              e.preventDefault();
-              router.push("/dashboard");
-            }}
-          >
+          <form className="space-y-10" onSubmit={handleSave}>
             {/* URL Input Section */}
             <div className="space-y-4">
               <div className="flex justify-between items-center px-1">
                 <label className="text-[10px] font-bold text-[#ba8ffa] uppercase tracking-[0.2em]">
-                  Source URL
+                  Source URL{" "}
+                  <span className="text-red-500 ml-1 italic normal-case font-medium opacity-70">
+                    * Required
+                  </span>
                 </label>
                 {isScanning && (
                   <div className="flex items-center gap-2 text-blue-400">
@@ -232,7 +244,10 @@ const AddResource = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <label className="text-[10px] font-bold text-[#8791fe] uppercase tracking-[0.2em] px-1">
-                  Title
+                  Title{" "}
+                  <span className="text-red-500 ml-1 italic normal-case font-medium opacity-70">
+                    * Required
+                  </span>
                 </label>
                 <div className="relative group">
                   <Type
@@ -293,7 +308,7 @@ const AddResource = () => {
                     onClick={() =>
                       setFormData({ ...formData, category: cat.id })
                     }
-                    className={`flex flex-col items-center justify-center gap-3 py-4 rounded-2xl border transition-all duration-500 ${formData.category === cat.id ? "bg-[#ba8ffa] border-[#ba8ffa] text-black font-black shadow-[0_15px_30px_rgba(186,143,250,0.3)]" : "bg-white/5 border-white/5 text-gray-600 hover:text-white hover:bg-white/10"}`}
+                    className={`flex flex-col cursor-pointer items-center justify-center gap-3 py-4 rounded-2xl border transition-all duration-500 ${formData.category === cat.id ? "bg-[#ba8ffa] border-[#ba8ffa] text-black font-black shadow-[0_15px_30px_rgba(186,143,250,0.3)]" : "bg-white/5 border-white/5 text-gray-600 hover:text-white hover:bg-white/10"}`}
                   >
                     {cat.icon}
                     <span className="text-[9px] uppercase tracking-tighter">
@@ -305,18 +320,36 @@ const AddResource = () => {
             </div>
 
             {/* Final Action */}
-            <button
-              type="submit"
-              onClick={() => handleSave()}
-              className="w-full bg-white text-black font-black py-6 rounded-[2.5rem] hover:bg-[#ba8ffa] hover:shadow-[0_20px_60px_rgba(186,143,250,0.4)] transition-all duration-700 flex items-center justify-center gap-4 text-xl group overflow-hidden relative"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              <span className="relative z-10">Commit to Library</span>
-              <Send
-                size={24}
-                className="relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-500"
-              />
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => router.push("/library")}
+                className="flex-1 bg-white/5 cursor-pointer text-white font-bold py-6 rounded-[2.5rem] hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2 border border-white/10"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!isFormValid || isSubmitting}
+                className={`flex-[2] py-6 rounded-[2.5rem] font-black flex items-center justify-center gap-4 text-xl group overflow-hidden relative transition-all duration-700 ${isFormValid && !isSubmitting
+                  ? "bg-white cursor-pointer text-black hover:bg-[#ba8ffa] hover:shadow-[0_20px_60px_rgba(186,143,250,0.4)]"
+                  : "bg-white/10 text-gray-600 cursor-not-allowed border border-white/5"
+                  }`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <span className="relative z-10">
+                  {isSubmitting ? "Committing..." : "Commit to Library"}
+                </span>
+                {isSubmitting ? (
+                  <Loader2 size={24} className="relative z-10 animate-spin" />
+                ) : (
+                  <Send
+                    size={24}
+                    className="relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-500"
+                  />
+                )}
+              </button>
+            </div>
           </form>
         </div>
 

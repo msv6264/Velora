@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import supabase from "../../../lib/supabase";
 
 const logo = "/logo.png";
@@ -23,10 +23,46 @@ import { getUserData } from "@/src/services/auth";
 
 const Dashboard = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState("All");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [clipboardLink, setClipboardLink] = useState(null);
   const [userName, setUserName] = useState(null);
+
+  const navItems = [
+    {
+      icon: <LayoutDashboard size={20} />,
+      label: "Dashboard",
+      href: "/dashboard",
+    },
+    {
+      icon: <BookOpen size={20} />,
+      label: "My Library",
+      href: "/library",
+    },
+    {
+      icon: <Sparkles size={20} />,
+      label: "Rediscovery",
+      href: "/rediscovery",
+    },
+    {
+      icon: <FolderOpen size={20} />,
+      label: "Collections",
+      href: "/collections",
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: <Settings size={20} />,
+      type: "bottom",
+    },
+    {
+      label: "Log out",
+      href: "/",
+      icon: <LogOut size={20} />,
+      type: "bottom",
+    },
+  ];
 
   // fetching user name to greet user
   useEffect(() => {
@@ -155,40 +191,37 @@ const Dashboard = () => {
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-4">
-          <NavItem
-            icon={<LayoutDashboard size={20} />}
-            label="Dashboard"
-            active
-            onClick={() => router.push("/dashboard")}
-          />
-          <NavItem
-            icon={<BookOpen size={20} />}
-            label="My Library"
-            onClick={() => router.push("/library")}
-          />
-          <NavItem
-            icon={<Sparkles size={20} />}
-            label="Rediscovery"
-            onClick={() => router.push("/rediscovery")}
-          />
-          <NavItem
-            icon={<FolderOpen size={20} />}
-            label="Collections"
-            onClick={() => router.push("/collections")}
-          />
+          {navItems
+            .filter((item) => item.type !== "bottom")
+            .map((item) => (
+              <NavItem
+                className="cursor-pointer"
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                active={pathname === item.href}
+                onClick={() => router.push(item.href)}
+              />
+            ))}
           <div className="pt-8 pb-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">
             System
           </div>
-          <NavItem
-            icon={<Settings size={20} />}
-            label="Settings"
-            onClick={() => router.push("/settings")}
-          />
-          <NavItem
-            icon={<LogOut size={20} />}
-            label="Log out"
-            onClick={() => handleLogout()}
-          />
+          {navItems
+            .filter((item) => item.type === "bottom")
+            .map((item) => (
+              <NavItem
+                className="cursor-pointer"
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                active={pathname === item.href}
+                onClick={() =>
+                  item.label === "Log out"
+                    ? handleLogout()
+                    : router.push(item.href)
+                }
+              />
+            ))}
         </nav>
 
         <div className="p-6">
@@ -359,7 +392,7 @@ const Dashboard = () => {
 const NavItem = ({ icon, label, active = false, onClick }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 ${active ? "bg-[#ba8ffa] text-black font-bold shadow-[0_0_20px_rgba(186,143,250,0.2)]" : "text-gray-500 hover:text-white hover:bg-white/5"}`}
+    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 cursor-pointer ${active ? "bg-[#ba8ffa] text-black font-bold shadow-[0_0_20px_rgba(186,143,250,0.2)]" : "text-gray-500 hover:text-white hover:bg-white/5"}`}
   >
     {icon}
     <span>{label}</span>

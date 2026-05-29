@@ -13,6 +13,7 @@ export async function createResource(resourceData) {
                 "user_id": user_id,
             }
         ])
+        .select()
 
         if(error){
             return {error: error};

@@ -107,7 +107,7 @@ const Library = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/dashboard")}
-              className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-all group"
+              className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-all group"
             >
               <ArrowLeft
                 size={24}
@@ -143,7 +143,7 @@ const Library = () => {
             </div>
             <button
               onClick={() => router.push("/add-resource")}
-              className="p-3.5 rounded-2xl bg-[#ba8ffa] text-black hover:shadow-[0_0_25px_rgba(186,143,250,0.3)] transition-all"
+              className="p-3.5 rounded-2xl bg-[#ba8ffa] text-black hover:shadow-[0_0_25px_rgba(186,143,250,0.3)] cursor-pointer transition-all"
             >
               <Plus size={24} />
             </button>
@@ -208,7 +208,7 @@ const Library = () => {
             </p>
             <button
               onClick={() => router.push("/add-resource")}
-              className="px-6 py-3 rounded-xl bg-[#ba8ffa] text-black font-semibold hover:shadow-[0_0_25px_rgba(186,143,250,0.3)] transition-all flex items-center gap-2"
+              className="px-6 py-3 rounded-xl bg-[#ba8ffa] text-black font-semibold hover:shadow-[0_0_25px_rgba(186,143,250,0.3)] cursor-pointer transition-all flex items-center gap-2"
             >
               <Plus size={20} />
               <span>Add Resource</span>
