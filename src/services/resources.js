@@ -11,6 +11,7 @@ export async function createResource(resourceData) {
                 "url": resourceData.url,
                 "category": resourceData.category,
                 "user_id": user_id,
+                "status": resourceData.status || 'not_started',
             }
         ])
         .select()

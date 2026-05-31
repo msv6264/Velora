@@ -35,6 +35,7 @@ const AddResource = () => {
     title: "",
     category: "Article",
     collection: "",
+    status: "not_started",
   });
 
   const isFormValid =
@@ -316,6 +317,27 @@ const AddResource = () => {
                     </span>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em] px-1">
+                Status
+              </label>
+              <div className="relative group">
+                <select
+                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 px-6 text-white focus:outline-none focus:border-[#ba8ffa]/30 focus:bg-white/10 transition-all appearance-none cursor-pointer"
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                >
+                  <option value="not_started" className="bg-[#0a0a0a]">Not Started</option>
+                  <option value="in_progress" className="bg-[#0a0a0a]">In Progress</option>
+                  <option value="completed" className="bg-[#0a0a0a]">Completed</option>
+                  <option value="revisit_needed" className="bg-[#0a0a0a]">Revisit Needed</option>
+                </select>
               </div>
             </div>
 
