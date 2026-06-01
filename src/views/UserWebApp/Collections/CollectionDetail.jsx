@@ -109,8 +109,16 @@ const CollectionDetail = () => {
     setActiveMenu(null);
   };
 
-  const handleSaveResource = (e) => {
+  const handleSaveResource = async (e) => {
     e.preventDefault();
+
+    // Build whitelist payload; exclude `category` (foreign key)
+    const allowed = ["title", "type", "status"];
+    const updatePayload = {};
+    if (formTitle !== undefined) updatePayload.title = formTitle;
+    if (formType !== undefined) updatePayload.type = formType;
+    if (formStatus !== undefined) updatePayload.status = formStatus;
+
     setResources((prev) =>
       prev.map((r) =>
         r.id === editingResource.id
