@@ -1,12 +1,7 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  deleteResource,
-  getResources,
-  updateResource,
-} from "../../../services/resources";
-import toast from "react-hot-toast";
+import { useResources } from "@/hooks/library/useResources";
 import DeleteDialog from "../../../components/DeleteDialog";
 import GridResourceCard from "@/components/library/GridResourceCard";
 import ListResourceCard from "@/components/library/ListResourceCard";
@@ -16,10 +11,7 @@ import LibraryToolbar from "@/components/library/LibraryToolbar";
 import {
   Search,
   ArrowLeft,
-  LayoutGrid,
-  List,
   Plus,
-  FolderOpen,
 } from "lucide-react";
 
 const Library = () => {
@@ -27,26 +19,13 @@ const Library = () => {
   const [viewMode, setViewMode] = useState("grid");
   const [filter, setFilter] = useState("All");
   const [activeMenu, setActiveMenu] = useState(null);
-  const [resources, setResources] = useState({});
   const [editingResource, setEditingResource] = useState(null);
   const [resourceToDelete, setResourceToDelete] = useState(null);
 
-  useEffect(() => {
-    const fetchResources = async () => {
-      const response = await getResources();
-      // console.log(response.data);
-      if (response.data) {
-        const resourceMap = response.data.reduce((acc, item) => {
-          acc[item.id] = item;
-          return acc;
-        }, {});
-        setResources(resourceMap);
-      } else {
-        return { message: "No resources found" };
-      }
-    };
-    fetchResources();
-  }, []);
+  const { resources, setResources, handleSave, handleDelete } = useResources({
+    editingResource,
+    setEditingResource,
+  });
 
   const filteredResources = useMemo(() => {
     return Object.values(resources).filter((res) => {
@@ -76,46 +55,7 @@ const Library = () => {
     setActiveMenu(null);
   };
 
-  const handleSave = async () => {
-    if (!editingResource.title?.trim() || !editingResource.url?.trim()) {
-      toast.error("Please provide both a title and a URL.");
-      return;
-    }
-
-    try {
-      // Prevent modifying primary key and immutable fields
-      const { id, user_id, created_at, ...updatePayload } = editingResource;
-
-      // Send to backend
-      await updateResource(editingResource.id, updatePayload);
-
-      // Update local state
-      setResources((prev) => ({
-        ...prev,
-        [editingResource.id]: editingResource,
-      }));
-      setEditingResource(null);
-    } catch (error) {
-      console.error("Update failed", error);
-    }
-  };
-
-  const handleDelete = async (resId) => {
-    const response = await deleteResource(resId);
-
-    if (response) {
-      setResources((prev) => {
-        const next = { ...prev };
-        delete next[resId];
-        return next;
-      });
-      toast.success("Resource deleted successfully");
-    } else {
-      console.log("Error in deleting resource: ", response);
-      toast.error("Failed to delete resource");
-    }
-    setResourceToDelete(null);
-  };
+  // Note: data logic moved to `useResources` hook; UI-only state remains here.
 
   return (
     <div
@@ -228,7 +168,10 @@ const Library = () => {
       <DeleteDialog
         isOpen={!!resourceToDelete}
         onClose={() => setResourceToDelete(null)}
-        onConfirm={() => handleDelete(resourceToDelete)}
+        onConfirm={() => {
+          handleDelete(resourceToDelete);
+          setResourceToDelete(null);
+        }}
         title="Delete Resource"
         message="Are you sure you want to delete this resource? This action cannot be undone."
       />
