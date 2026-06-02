@@ -34,6 +34,8 @@ export function useResources({ editingResource, setEditingResource } = {}) {
 
     try {
       const { id, user_id, created_at, ...updatePayload } = resource;
+      console.log('from useResources inside hook, resource', resource);
+      console.log('from useResources inside hook, updatePayload', updatePayload);
       await updateResource(resource.id, updatePayload);
 
       setResources((prev) => ({

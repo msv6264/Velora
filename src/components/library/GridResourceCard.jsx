@@ -17,6 +17,7 @@ const GridResourceCard = ({
   handleEditResource,
   setResourceToDelete,
 }) => {
+  console.log("resource: ", resource);
   return (
     <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/10 transition-all duration-500 group relative">
       <div
@@ -82,7 +83,7 @@ const GridResourceCard = ({
           <FolderOpen size={14} className="text-[#8791fe]" />
 
           <span className="text-xs text-gray-400 font-medium">
-            {resource.category || resource.collection || "Uncategorized"}
+            {resource.type || resource.category || resource.collection || "Uncategorized"}
           </span>
         </div>
 
