@@ -8,11 +8,7 @@ import ListResourceCard from "@/components/library/ListResourceCard";
 import EmptyState from "@/components/library/EmptyState";
 import EditResourceModal from "@/components/library/EditResourceModal";
 import LibraryToolbar from "@/components/library/LibraryToolbar";
-import {
-  Search,
-  ArrowLeft,
-  Plus,
-} from "lucide-react";
+import { Search, ArrowLeft, Plus } from "lucide-react";
 
 const Library = () => {
   const router = useRouter();

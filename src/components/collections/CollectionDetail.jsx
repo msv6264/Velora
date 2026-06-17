@@ -4,24 +4,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 
 import NeuralBg from "../../../components/NeuralBg";
-import {
-  ArrowLeft,
-  Search,
-  LayoutGrid,
-  List,
-  MoreVertical,
-  ExternalLink,
-  Pencil,
-  Trash2,
-  FileText,
-  TvMinimalPlay,
-  Layout,
-  Filter,
-  Plus,
-  X,
-  Save,
-  Activity,
-} from "lucide-react";
+import { ArrowLeft, Search, LayoutGrid, List, MoreVertical, ExternalLink, Pencil, Trash2, Filter, Plus, X, Save, Activity } from "lucide-react";
 
 const STATUS_CONFIG = {
   not_started: {
@@ -64,35 +47,7 @@ const CollectionDetail = () => {
     color: "from-[#ba8ffa]/20",
   });
 
-  const [resources, setResources] = useState([
-    {
-      id: 1,
-      title: "The Future of AI Agents",
-      type: "Article",
-      date: "2 hours ago",
-      color: "bg-[#ba8ffa]",
-      icon: <FileText size={18} />,
-      status: "completed",
-    },
-    {
-      id: 7,
-      title: "System Design Interview",
-      type: "Course",
-      date: "3 weeks ago",
-      color: "bg-[#ba8ffa]",
-      icon: <Layout size={18} />,
-      status: "in_progress",
-    },
-    {
-      id: 9,
-      title: "Neural Networks Decoded",
-      type: "Video",
-      date: "1 month ago",
-      color: "bg-[#ba8ffa]",
-      icon: <TvMinimalPlay size={18} />,
-      status: "not_started",
-    },
-  ]);
+  const [resources, setResources] = useState([]);
 
   const toggleMenu = (e, id) => {
     e.stopPropagation();
