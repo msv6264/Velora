@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import NeuralBg from "../../../components/NeuralBg";
@@ -15,6 +15,8 @@ import {
   Save,
   Check
 } from 'lucide-react';
+import { createCollection, getCollections } from '@/services/collections';
+import { getResources } from '@/services/resources';
 
 // Icon Renderer Helper
 const IconRenderer = ({ name, size = 24, className = "" }) => {
@@ -30,15 +32,21 @@ const Collections = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCollection, setEditingCollection] = useState(null);
-  
-  // Library Resources (Mock)
-  const availableResources = [
-    { id: 1, title: 'The Future of AI Agents' },
-    { id: 2, title: 'Advanced React Patterns' },
-    { id: 3, title: 'UI Design Principles' },
-    { id: 4, title: 'Modern CSS Techniques' },
-    { id: 5, title: 'Web Performance Guide' },
-  ];
+  const [allResources, setAllResources] = useState([]);
+
+  useEffect(() => {
+    async function loadResources() {
+      const { data } = await getResources();
+      setAllResources(data);
+    }
+
+    loadResources();
+  },[])
+
+  const availableResources = allResources.map(resource => ({
+    id: resource.id,
+    title: resource.title,
+  }));
 
   // Icon List for Picker
   const iconOptions = [
@@ -58,12 +66,7 @@ const Collections = () => {
 
   // Collections State (Updated to use string icons)
   const [collections, setCollections] = useState([
-    { id: 1, name: 'Research', count: 42, icon: 'Layers', color: 'from-[#ba8ffa]/20 to-transparent' },
-    { id: 2, name: 'Dev Tools', count: 28, icon: 'Code', color: 'from-[#8791fe]/20 to-transparent' },
-    { id: 3, name: 'Design Inspo', count: 15, icon: 'Palette', color: 'from-[#ba8ffa]/20 to-transparent' },
-    { id: 4, name: 'AI & ML', count: 31, icon: 'Cpu', color: 'from-[#8791fe]/20 to-transparent' },
-    { id: 5, name: 'Web Dev', count: 19, icon: 'Globe', color: 'from-[#ba8ffa]/20 to-transparent' },
-    { id: 6, name: 'Quick Saves', count: 54, icon: 'Zap', color: 'from-[#8791fe]/20 to-transparent' },
+    getCollections()
   ]);
 
   // Form States
@@ -98,6 +101,7 @@ const Collections = () => {
     };
 
     setCollections(prev => [...prev, newCollection]);
+    createCollection(newCollection, selectedResources);
     setShowCreateModal(false);
   };
 
