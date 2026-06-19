@@ -3,26 +3,20 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import NeuralBg from "../../../components/NeuralBg";
-import * as Icons from "lucide-react";
+import { FolderPlus, ArrowLeft } from "lucide-react";
 import {
-  FolderPlus,
-  ArrowLeft,
-  MoreHorizontal,
-  ArrowRight,
-  Pencil,
-  Trash2,
-  X,
-  Save,
-  Check,
-} from "lucide-react";
-import { createCollection, getCollections, updateCollections, getRelations, getResourceCount } from "@/services/collections";
+  createCollection,
+  getCollections,
+  updateCollections,
+  getRelations,
+  getResourceCount,
+  deleteCollections,
+} from "@/services/collections";
 import { getResources } from "@/services/resources";
 
-// Icon Renderer Helper
-const IconRenderer = ({ name, size = 24, className = "" }) => {
-  const IconComponent = Icons[name] || Icons.HelpCircle;
-  return <IconComponent size={size} className={className} />;
-};
+import CollectionCard from "@/components/collections/CollectionCard";
+import CollectionModal from "@/components/collections/CollectionModal";
+import DeleteDialog from "../../../components/DeleteDialog";
 
 const Collections = () => {
   const router = useRouter();
@@ -32,6 +26,7 @@ const Collections = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCollection, setEditingCollection] = useState(null);
+  const [collectionToDelete, setCollectionToDelete] = useState(null);
   const [allResources, setAllResources] = useState([]);
   const [collections, setCollections] = useState([]);
 
@@ -61,7 +56,7 @@ const Collections = () => {
             color: collection.color ?? collection.theme_color,
             count: count,
           };
-        })
+        }),
       );
 
       setCollections(collectionsWithCount);
@@ -74,22 +69,6 @@ const Collections = () => {
     id: resource.id,
     title: resource.title,
   }));
-
-  // Icon List for Picker
-  const iconOptions = [
-    "Layers",
-    "Code",
-    "Palette",
-    "Cpu",
-    "Globe",
-    "Zap",
-    "BookOpen",
-    "Target",
-    "Flame",
-    "Camera",
-    "Music",
-    "Terminal",
-  ];
 
   // Theme Options
   const themeOptions = [
@@ -108,7 +87,7 @@ const Collections = () => {
   const [selectedResources, setSelectedResources] = useState([]);
 
   const toggleMenu = (e, id) => {
-    e.stopPropagation();
+    e?.stopPropagation?.();
     setActiveMenu(activeMenu === id ? null : id);
   };
 
@@ -143,7 +122,7 @@ const Collections = () => {
     setFormName(col.name);
     setFormColor(col.color);
     setFormIcon(col.icon);
-    
+
     // Fetch existing relations
     const { data, error } = await getRelations(col.id);
     if (!error && data) {
@@ -158,7 +137,7 @@ const Collections = () => {
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-    
+
     // 1. Package the updated details into a single object payload
     const updatedData = {
       name: formName,
@@ -170,17 +149,40 @@ const Collections = () => {
     setCollections((prev) =>
       prev.map((c) =>
         c.id === editingCollection.id
-          ? { ...c, name: formName, color: formColor, icon: formIcon, count: selectedResources.length }
+          ? {
+              ...c,
+              name: formName,
+              color: formColor,
+              icon: formIcon,
+              count: selectedResources.length,
+            }
           : c,
       ),
     );
     setShowEditModal(false);
 
     // 3. Send the ID, updated details, and selected resources to the backend
-    const { error } = await updateCollections(editingCollection.id, updatedData, selectedResources);
+    const { error } = await updateCollections(
+      editingCollection.id,
+      updatedData,
+      selectedResources,
+    );
     if (error) {
       console.error("Failed to update collection:", error);
     }
+  };
+
+  const handleDeleteCollection = async () => {
+    if (!collectionToDelete) return;
+
+    const id = collectionToDelete.id;
+    setCollections((prev) => prev.filter((c) => c.id !== id));
+    
+    const { error } = await deleteCollections(id);
+    if (error) {
+      console.error("Failed to delete collection:", error);
+    }
+    setCollectionToDelete(null);
   };
 
   const toggleResourceSelection = (id) => {
@@ -230,69 +232,15 @@ const Collections = () => {
         {/* Collections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {collections.map((col) => (
-            <div
+            <CollectionCard
               key={col.id}
-              onClick={() => router.push(`/collections/${col.id}`)}
-              className="group relative p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 backdrop-blur-xl hover:bg-white/[0.05] transition-all duration-700 cursor-pointer overflow-hidden"
-            >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${col.color} opacity-0 group-hover:opacity-100 transition-opacity duration-1000`}
-              />
-
-              <div className="relative z-10">
-                <div className="flex justify-between items-start mb-10">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#ba8ffa] group-hover:scale-110 group-hover:bg-[#ba8ffa]/10 transition-all duration-500">
-                    <IconRenderer name={col.icon} size={28} />
-                  </div>
-                  <div className="relative">
-                    <button
-                      onClick={(e) => toggleMenu(e, col.id)}
-                      className={`p-2 rounded-xl transition-all ${activeMenu === col.id ? "bg-[#ba8ffa] text-black" : "text-gray-600 hover:text-white hover:bg-white/5"}`}
-                    >
-                      <MoreHorizontal size={24} />
-                    </button>
-
-                    {activeMenu === col.id && (
-                      <div className="absolute right-0 mt-2 w-48 bg-[#121212] border border-white/10 rounded-2xl p-2 shadow-2xl z-50 backdrop-blur-3xl animate-in fade-in zoom-in duration-200">
-                        <button
-                          onClick={(e) => handleEditClick(e, col)}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-all group/item"
-                        >
-                          <Pencil size={16} />
-                          <span className="text-sm font-medium">
-                            Edit Collection
-                          </span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCollections((prev) =>
-                              prev.filter((c) => c.id !== col.id),
-                            );
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-red-500/10 hover:text-red-500 transition-all group/item"
-                        >
-                          <Trash2 size={16} />
-                          <span className="text-sm font-medium">Delete</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <h3 className="text-2xl font-bold mb-2 tracking-tight group-hover:text-[#ba8ffa] transition-colors">
-                  {col.name}
-                </h3>
-                <p className="text-gray-500 font-spectral italic mb-8">
-                  {col.count} items
-                </p>
-
-                <div className="flex items-center gap-2 text-[#8791fe] text-sm font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                  <span>Explore</span>
-                  <ArrowRight size={16} />
-                </div>
-              </div>
-            </div>
+              col={col}
+              router={router}
+              activeMenu={activeMenu}
+              toggleMenu={toggleMenu}
+              handleEditClick={handleEditClick}
+              setCollectionToDelete={setCollectionToDelete}
+            />
           ))}
 
           {/* Add Placeholder */}
@@ -311,137 +259,36 @@ const Collections = () => {
       </div>
 
       {/* CREATE / EDIT MODAL */}
-      {(showCreateModal || showEditModal) && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            onClick={() => {
-              setShowCreateModal(false);
-              setShowEditModal(false);
-            }}
-          />
-          <div className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-12 shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh] no-scrollbar">
-            <button
-              onClick={() => {
-                setShowCreateModal(false);
-                setShowEditModal(false);
-              }}
-              className="absolute top-8 right-8 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:text-white transition-colors"
-            >
-              <X size={20} />
-            </button>
+      <CollectionModal
+        isOpen={showCreateModal || showEditModal}
+        onClose={() => {
+          setShowCreateModal(false);
+          setShowEditModal(false);
+        }}
+        isEditMode={showEditModal}
+        formName={formName}
+        setFormName={setFormName}
+        formIcon={formIcon}
+        setFormIcon={setFormIcon}
+        formColor={formColor}
+        setFormColor={setFormColor}
+        selectedResources={selectedResources}
+        toggleResourceSelection={toggleResourceSelection}
+        availableResources={availableResources}
+        onSubmit={showCreateModal ? handleCreate : handleSaveEdit}
+      />
 
-            <h2 className="text-4xl font-bold mb-2 tracking-tight">
-              {showCreateModal ? "New Collection" : "Edit Collection"}
-            </h2>
-            <p className="text-gray-500 font-spectral italic text-lg mb-12">
-              {showCreateModal
-                ? "Define a new path for your focus."
-                : "Refine your intentional space."}
-            </p>
-
-            <form
-              onSubmit={showCreateModal ? handleCreate : handleSaveEdit}
-              className="space-y-10"
-            >
-              {/* Name Input */}
-              <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-[#ba8ffa] font-bold mb-4">
-                  Collection Name
-                </label>
-                <input
-                  type="text"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-8 text-xl text-white focus:outline-none focus:border-[#ba8ffa]/50 transition-all placeholder:text-gray-700"
-                  placeholder="e.g. Cognitive Research"
-                  required
-                />
-              </div>
-
-              {/* Icon Picker */}
-              <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-[#ba8ffa] font-bold mb-4">
-                  Choose Icon
-                </label>
-                <div className="grid grid-cols-6 gap-4">
-                  {iconOptions.map((icon) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      onClick={() => setFormIcon(icon)}
-                      className={`h-16 rounded-2xl flex items-center justify-center transition-all ${formIcon === icon ? "bg-[#ba8ffa] text-black scale-110" : "bg-white/5 text-gray-500 hover:text-white hover:bg-white/10"}`}
-                    >
-                      <IconRenderer name={icon} size={24} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Theme Picker */}
-              <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-[#ba8ffa] font-bold mb-4">
-                  Visual Theme
-                </label>
-                <div className="grid grid-cols-6 gap-4">
-                  {themeOptions.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setFormColor(color)}
-                      className={`h-12 rounded-xl bg-gradient-to-br ${color} border-2 ${formColor === color ? "border-white scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "border-transparent opacity-50 hover:opacity-100"} transition-all`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Resource Multi-Select Dropdown */}
-              <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-[#ba8ffa] font-bold mb-4">
-                  Attach Resources
-                </label>
-                <div className="space-y-3 max-h-48 overflow-y-auto pr-2 no-scrollbar">
-                  {availableResources.map((res) => (
-                    <div
-                      key={res.id}
-                      onClick={() => toggleResourceSelection(res.id)}
-                      className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedResources.includes(res.id) ? "bg-[#ba8ffa]/10 border-[#ba8ffa]/30 text-white" : "bg-white/5 border-white/5 text-gray-500 hover:bg-white/10"}`}
-                    >
-                      <span className="font-medium">{res.title}</span>
-                      {selectedResources.includes(res.id) && (
-                        <Check size={18} className="text-[#ba8ffa]" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="pt-8 flex gap-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setShowEditModal(false);
-                  }}
-                  className="flex-1 py-5 rounded-2xl bg-white/5 border border-white/10 font-bold hover:bg-white/10 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-5 rounded-2xl bg-[#ba8ffa] text-black font-bold flex items-center justify-center gap-3 hover:shadow-[0_0_40px_rgba(186,143,250,0.4)] transition-all"
-                >
-                  <Save size={20} />
-                  {showCreateModal ? "Create Collection" : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        isOpen={!!collectionToDelete}
+        onClose={() => setCollectionToDelete(null)}
+        onConfirm={handleDeleteCollection}
+        title="Delete Collection"
+        message="Are you sure you want to delete this collection? This action cannot be undone."
+      />
     </div>
   );
 };
 
 export default Collections;
+
