@@ -17,8 +17,8 @@ export async function createResource(resourceData) {
       .select();
 
     if (error) {
-      return { error: error };
-    } else return { data: data };
+      return { data: null, error: error };
+    } else return { data: data, error: null };
   } catch (err) {
     // console.error(err);
     return { data: null, error: err };
