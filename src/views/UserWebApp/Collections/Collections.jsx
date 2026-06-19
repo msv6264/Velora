@@ -15,7 +15,7 @@ import {
   Save,
   Check,
 } from "lucide-react";
-import { createCollection, getCollections } from "@/services/collections";
+import { createCollection, getCollections, updateCollections, getRelations, getResourceCount } from "@/services/collections";
 import { getResources } from "@/services/resources";
 
 // Icon Renderer Helper
@@ -53,13 +53,18 @@ const Collections = () => {
         return;
       }
 
-      setCollections(
-        (data ?? []).map((collection) => ({
-          ...collection,
-          color: collection.color ?? collection.theme_color,
-          count: collection.count ?? 0,
-        })),
+      const collectionsWithCount = await Promise.all(
+        (data ?? []).map(async (collection) => {
+          const { count } = await getResourceCount(collection.id);
+          return {
+            ...collection,
+            color: collection.color ?? collection.theme_color,
+            count: count,
+          };
+        })
       );
+
+      setCollections(collectionsWithCount);
     }
 
     loadCollections();
@@ -132,26 +137,50 @@ const Collections = () => {
     setShowCreateModal(false);
   };
 
-  const handleEditClick = (e, col) => {
+  const handleEditClick = async (e, col) => {
     e.stopPropagation();
     setEditingCollection(col);
     setFormName(col.name);
     setFormColor(col.color);
     setFormIcon(col.icon);
+    
+    // Fetch existing relations
+    const { data, error } = await getRelations(col.id);
+    if (!error && data) {
+      setSelectedResources(data.map((r) => r.resource_id));
+    } else {
+      setSelectedResources([]);
+    }
+
     setShowEditModal(true);
     setActiveMenu(null);
   };
 
-  const handleSaveEdit = (e) => {
+  const handleSaveEdit = async (e) => {
     e.preventDefault();
+    
+    // 1. Package the updated details into a single object payload
+    const updatedData = {
+      name: formName,
+      theme_color: formColor,
+      icon: formIcon,
+    };
+
+    // 2. Update frontend state (optimistic update)
     setCollections((prev) =>
       prev.map((c) =>
         c.id === editingCollection.id
-          ? { ...c, name: formName, color: formColor, icon: formIcon }
+          ? { ...c, name: formName, color: formColor, icon: formIcon, count: selectedResources.length }
           : c,
       ),
     );
     setShowEditModal(false);
+
+    // 3. Send the ID, updated details, and selected resources to the backend
+    const { error } = await updateCollections(editingCollection.id, updatedData, selectedResources);
+    if (error) {
+      console.error("Failed to update collection:", error);
+    }
   };
 
   const toggleResourceSelection = (id) => {
@@ -367,27 +396,25 @@ const Collections = () => {
               </div>
 
               {/* Resource Multi-Select Dropdown */}
-              {showCreateModal && (
-                <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-[#ba8ffa] font-bold mb-4">
-                    Attach Resources
-                  </label>
-                  <div className="space-y-3 max-h-48 overflow-y-auto pr-2 no-scrollbar">
-                    {availableResources.map((res) => (
-                      <div
-                        key={res.id}
-                        onClick={() => toggleResourceSelection(res.id)}
-                        className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedResources.includes(res.id) ? "bg-[#ba8ffa]/10 border-[#ba8ffa]/30 text-white" : "bg-white/5 border-white/5 text-gray-500 hover:bg-white/10"}`}
-                      >
-                        <span className="font-medium">{res.title}</span>
-                        {selectedResources.includes(res.id) && (
-                          <Check size={18} className="text-[#ba8ffa]" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-[#ba8ffa] font-bold mb-4">
+                  Attach Resources
+                </label>
+                <div className="space-y-3 max-h-48 overflow-y-auto pr-2 no-scrollbar">
+                  {availableResources.map((res) => (
+                    <div
+                      key={res.id}
+                      onClick={() => toggleResourceSelection(res.id)}
+                      className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedResources.includes(res.id) ? "bg-[#ba8ffa]/10 border-[#ba8ffa]/30 text-white" : "bg-white/5 border-white/5 text-gray-500 hover:bg-white/10"}`}
+                    >
+                      <span className="font-medium">{res.title}</span>
+                      {selectedResources.includes(res.id) && (
+                        <Check size={18} className="text-[#ba8ffa]" />
+                      )}
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
 
               {/* Actions */}
               <div className="pt-8 flex gap-6">

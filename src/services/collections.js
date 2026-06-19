@@ -87,3 +87,97 @@ export async function getRelations(collectionId){
         return { data: null, error: err };
     }
 }
+
+export async function getResourceCount(collectionId) {
+    try {
+        const { count, error } = await supabase
+            .from("resource_collections")
+            .select('*', { count: 'exact', head: true })
+            .eq("collection_id", collectionId);
+
+        if (error) {
+            return { count: 0, error };
+        }
+        return { count: count || 0, error: null };
+    } catch (err) {
+        return { count: 0, error: err };
+    }
+}
+
+export async function updateCollections(
+    collection_id,
+    collectionData,
+    resourceIds = null
+) {
+    try {
+        const { id, user_id, created_at, ...updatePayload } = collectionData;
+
+        // Update collection metadata
+        const { data, error } = await supabase
+            .from("collections")
+            .update(updatePayload)
+            .eq("id", collection_id)
+            .select()
+            .single();
+
+        if (error) {
+            return { data: null, error };
+        }
+
+        // Update resource relations if provided
+        if (resourceIds) {
+            const { data: currentRelations, error: relErr } = await getRelations(collection_id);
+
+            if (relErr) {
+                return { data: null, error: relErr };
+            }
+
+            const currentIds = currentRelations.map(
+                (r) => r.resource_id
+            );
+
+            // Resources to add
+            const idsToAdd = resourceIds.filter(
+                (id) => !currentIds.includes(id)
+            );
+
+            // Resources to remove
+            const idsToRemove = currentIds.filter(
+                (id) => !resourceIds.includes(id)
+            );
+
+            // Insert new relations
+            if (idsToAdd.length > 0) {
+                const rowsToInsert = idsToAdd.map((resource_id) => ({
+                    collection_id,
+                    resource_id,
+                }));
+
+                const { error: insertErr } = await supabase
+                    .from("resource_collections")
+                    .insert(rowsToInsert);
+
+                if (insertErr) {
+                    return { data: null, error: insertErr };
+                }
+            }
+
+            // Delete removed relations
+            if (idsToRemove.length > 0) {
+                const { error: deleteErr } = await supabase
+                    .from("resource_collections")
+                    .delete()
+                    .eq("collection_id", collection_id)
+                    .in("resource_id", idsToRemove);
+
+                if (deleteErr) {
+                    return { data: null, error: deleteErr };
+                }
+            }
+        }
+
+        return { data, error: null };
+    } catch (err) {
+        return { data: null, error: err };
+    }
+}
