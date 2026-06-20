@@ -207,3 +207,19 @@ export async function deleteCollections(collectionId) {
         return { data: null, error: error };
     }
 }
+
+export async function addRelations(collectionId, resourceIds) {
+    try {
+        const rows = resourceIds.map((resId) => ({
+            collection_id: collectionId,
+            resource_id: resId,
+        }));
+        const { data, error } = await supabase
+            .from("resource_collections")
+            .insert(rows)
+            .select();
+        return { data, error };
+    } catch (err) {
+        return { data: null, error: err };
+    }
+}

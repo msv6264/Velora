@@ -18,16 +18,25 @@ import {
   FolderOpen,
   Filter,
   XCircle,
+  Menu,
+  X,
 } from "lucide-react";
-import { getUserData } from "@/src/services/auth";
+import { getUserData } from "@/services/auth";
 
 const Dashboard = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState("All");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [clipboardLink, setClipboardLink] = useState(null);
   const [userName, setUserName] = useState(null);
+
+  // Initialize sidebar based on screen width
+  useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
 
   const navItems = [
     {
@@ -112,82 +121,104 @@ const Dashboard = () => {
       value: "42",
       icon: <Clock className="text-[#8791fe]" size={20} />,
     },
-    {
-      label: "Streaks",
-      value: "12 Days",
-      icon: <TrendingUp className="text-[#ba8ffa]" size={20} />,
-    },
+      {/* TO:DO - PAUSED TILL MVP */}
+    // {
+    //   label: "Streaks",
+    //   value: "12 Days",
+    //   icon: <TrendingUp className="text-[#ba8ffa]" size={20} />,
+    // },
   ];
 
-  const resources = [
-    {
-      id: 1,
-      title: "The Future of AI Agents",
-      type: "Article",
-      date: "2 hours ago",
-      color: "bg-[#ba8ffa]",
-      tab: "Article",
-    },
-    {
-      id: 2,
-      title: "Advanced React Patterns",
-      type: "Video",
-      date: "1 day ago",
-      color: "bg-[#8791fe]",
-      tab: "Video",
-    },
-    {
-      id: 3,
-      title: "UI Design Principles",
-      type: "Course",
-      date: "3 days ago",
-      color: "bg-[#ba8ffa]",
-      tab: "Course",
-    },
-    {
-      id: 4,
-      title: "Modern CSS Techniques",
-      type: "Article",
-      date: "4 days ago",
-      color: "bg-[#8791fe]",
-      tab: "Article",
-    },
-    {
-      id: 5,
-      title: "Web Performance Guide",
-      type: "PDF",
-      date: "1 week ago",
-      color: "bg-[#ba8ffa]",
-      tab: "PDF",
-    },
-    {
-      id: 6,
-      title: "TypeScript Best Practices",
-      type: "Video",
-      date: "2 weeks ago",
-      color: "bg-[#8791fe]",
-      tab: "Video",
-    },
-  ];
+  // const resources = [
+  //   {
+  //     id: 1,
+  //     title: "The Future of AI Agents",
+  //     type: "Article",
+  //     date: "2 hours ago",
+  //     color: "bg-[#ba8ffa]",
+  //     tab: "Article",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Advanced React Patterns",
+  //     type: "Video",
+  //     date: "1 day ago",
+  //     color: "bg-[#8791fe]",
+  //     tab: "Video",
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "UI Design Principles",
+  //     type: "Course",
+  //     date: "3 days ago",
+  //     color: "bg-[#ba8ffa]",
+  //     tab: "Course",
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Modern CSS Techniques",
+  //     type: "Article",
+  //     date: "4 days ago",
+  //     color: "bg-[#8791fe]",
+  //     tab: "Article",
+  //   },
+  //   {
+  //     id: 5,
+  //     title: "Web Performance Guide",
+  //     type: "PDF",
+  //     date: "1 week ago",
+  //     color: "bg-[#ba8ffa]",
+  //     tab: "PDF",
+  //   },
+  //   {
+  //     id: 6,
+  //     title: "TypeScript Best Practices",
+  //     type: "Video",
+  //     date: "2 weeks ago",
+  //     color: "bg-[#8791fe]",
+  //     tab: "Video",
+  //   },
+  // ];
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white font-outfit flex overflow-hidden">
+    <div className="min-h-screen bg-[#030303] text-white font-outfit flex overflow-hidden relative">
+      {/* Mobile Backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden transition-all duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col transition-all duration-500 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed md:static inset-y-0 left-0 z-40 w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col transition-all duration-500 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 overflow-y-auto`}
       >
-        <div className="p-8 flex items-center gap-3">
-          <div
-            className="w-10 h-10 bg-[#ba8ffa]/10 rounded-xl flex items-center justify-center border border-[#ba8ffa]/20 overflow-hidden p-2"
-            onClick={() => router.push("/")}
-          >
-            <img
-              src={logo}
-              alt="Velora Logo"
-              className="w-full h-full object-contain"
-            />
+        <div className="p-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 bg-[#ba8ffa]/10 rounded-xl flex items-center justify-center border border-[#ba8ffa]/20 overflow-hidden p-2 cursor-pointer"
+              onClick={() => {
+                setIsSidebarOpen(false);
+                router.push("/");
+              }}
+            >
+              <img
+                src={logo}
+                alt="Velora Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="text-2xl font-bold tracking-tight">Velora</span>
           </div>
-          <span className="text-2xl font-bold tracking-tight">Velora</span>
+
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 text-gray-500 hover:text-white md:hidden focus:outline-none"
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-4">
@@ -200,7 +231,10 @@ const Dashboard = () => {
                 icon={item.icon}
                 label={item.label}
                 active={pathname === item.href}
-                onClick={() => router.push(item.href)}
+                onClick={() => {
+                  if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  router.push(item.href);
+                }}
               />
             ))}
           <div className="pt-8 pb-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">
@@ -215,11 +249,14 @@ const Dashboard = () => {
                 icon={item.icon}
                 label={item.label}
                 active={pathname === item.href}
-                onClick={() =>
-                  item.label === "Log out"
-                    ? handleLogout()
-                    : router.push(item.href)
-                }
+                onClick={() => {
+                  if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  if (item.label === "Log out") {
+                    handleLogout();
+                  } else {
+                    router.push(item.href);
+                  }
+                }}
               />
             ))}
         </nav>
@@ -230,7 +267,10 @@ const Dashboard = () => {
               You've rediscovered 5 items this week!
             </p>
             <button
-              onClick={() => router.push("/insights")}
+              onClick={() => {
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
+                router.push("/insights");
+              }}
               className="w-full py-3 bg-[#ba8ffa] text-black rounded-xl font-bold text-sm hover:scale-[1.02] transition-all"
             >
               View Insights
@@ -245,20 +285,31 @@ const Dashboard = () => {
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#ba8ffa]/5 blur-[150px] rounded-full pointer-events-none" />
 
         {/* Header */}
-        <header className="sticky top-0 z-10 bg-black/50 backdrop-blur-xl border-b border-white/5 p-6 flex items-center justify-between">
-          <div className="relative w-96 group">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#ba8ffa] transition-colors"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Search your knowledge base..."
-              className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:border-[#ba8ffa]/30 focus:bg-white/10 transition-all"
-            />
+        <header className="sticky top-0 z-10 bg-black/50 backdrop-blur-xl border-b border-white/5 p-4 sm:p-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 md:flex-none">
+            {/* Sidebar toggle button (Mobile only) */}
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-white md:hidden focus:outline-none"
+              aria-label="Toggle Sidebar"
+            >
+              <Menu size={20} />
+            </button>
+
+            <div className="relative w-full md:w-96 group">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#ba8ffa] transition-colors"
+                size={18}
+              />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:border-[#ba8ffa]/30 focus:bg-white/10 transition-all text-sm md:text-base"
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <button
               onClick={() => router.push("/add-resource")}
               className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-[#ba8ffa] group"
@@ -274,56 +325,51 @@ const Dashboard = () => {
           </div>
         </header>
 
-        <div className="p-8 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-8 max-w-7xl mx-auto">
           {/* Welcome Section */}
-          <div className="mb-12">
-            <h1 className="text-4xl font-bold mb-2 tracking-tight">
+          <div className="mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight">
               Welcome, <span className="text-[#ba8ffa]"> {userName} 👋🏻</span>
             </h1>
-            <p className="text-gray-400 font-spectral italic text-xl">
+            <p className="text-gray-400 font-spectral italic text-lg sm:text-xl">
               What would you like to revisit today?
             </p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 sm:mb-12">
             {stats.map((stat, i) => (
               <div
                 key={i}
-                className="p-6 rounded-4xl bg-white/2 border border-white/5 backdrop-blur-xl hover:bg-white/5 transition-all group"
+                className="p-6 rounded-3xl sm:rounded-4xl bg-white/2 border border-white/5 backdrop-blur-xl hover:bg-white/5 transition-all group"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 rounded-xl bg-white/5 group-hover:scale-110 transition-all">
                     {stat.icon}
                   </div>
                 </div>
-                <div className="text-3xl font-bold mb-1">{stat.value}</div>
+                <div className="text-2xl sm:text-3xl font-bold mb-1">{stat.value}</div>
                 <div className="text-gray-500 text-sm">{stat.label}</div>
               </div>
             ))}
           </div>
 
           {/* Resources Section */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-6">
+          {/* TO:DO - PAUSED TILL MVP */}
+          {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto pb-2 sm:pb-0 scrollbar-none w-full sm:w-auto -mx-4 px-4 sm:mx-0 sm:px-0">
               {["All", "Articles", "Videos", "Courses", "PDFs", "Tools"].map(
                 (tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`text-lg font-medium transition-all ${activeTab === tab ? "text-white border-b-2 border-[#ba8ffa]" : "text-gray-500 hover:text-white"}`}
+                    className={`text-base sm:text-lg font-medium transition-all shrink-0 pb-1 ${activeTab === tab ? "text-white border-b-2 border-[#ba8ffa]" : "text-gray-500 hover:text-white"}`}
                   >
                     {tab}
                   </button>
                 ),
               )}
             </div>
-
-            {/* TO-DO: enhancement in production */}
-            {/* <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all">
-              <Filter size={18} />
-              <span>Filter</span>
-            </button> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -352,38 +398,8 @@ const Dashboard = () => {
                               <ResourceCard key={res.id} {...res} />
                             ))
                         : null}
-          </div>
+          </div> */}
         </div>
-
-        {/* TO-DO: implement clipboard suggestion in production when backend is added */}
-        {/* Clipboard Suggestion Toast */}
-        {/* {clipboardLink && (
-          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-10 duration-700">
-            <div className="bg-[#121212]/80 backdrop-blur-3xl border border-[#ba8ffa]/30 p-5 rounded-4xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-6 max-w-xl">
-              <div className="w-12 h-12 rounded-2xl bg-[#ba8ffa]/10 flex items-center justify-center text-[#ba8ffa]">
-                <Plus size={24} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Link detected in clipboard</p>
-                <p className="text-white font-medium truncate w-64">{clipboardLink}</p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => router.push(`/add-resource?url=${encodeURIComponent(clipboardLink)}`)}
-                  className="px-6 py-2.5 bg-[#ba8ffa] text-black rounded-xl font-bold text-sm hover:scale-[1.05] transition-all"
-                >
-                  Save Now
-                </button>
-                <button
-                  onClick={() => setClipboardLink(null)}
-                  className="p-2.5 text-gray-500 hover:text-white transition-colors"
-                >
-                  <XCircle size={20} />
-                </button>
-              </div>
-            </div>
-          </div>
-        )} */}
       </main>
     </div>
   );
@@ -400,9 +416,9 @@ const NavItem = ({ icon, label, active = false, onClick }) => (
 );
 
 const ResourceCard = ({ title, type, date, color }) => (
-  <div className="p-6 rounded-4xl bg-white/2 border border-white/5 backdrop-blur-xl hover:bg-white/6 hover:border-white/10 transition-all duration-500 group cursor-pointer">
+  <div className="p-6 rounded-3xl sm:rounded-4xl bg-white/2 border border-white/5 backdrop-blur-xl hover:bg-white/6 hover:border-white/10 transition-all duration-500 group cursor-pointer">
     <div className={`w-12 h-1.5 rounded-full ${color} mb-6`} />
-    <h3 className="text-xl font-bold mb-4 tracking-tight leading-snug group-hover:text-[#ba8ffa] transition-colors">
+    <h3 className="text-lg sm:text-xl font-bold mb-4 tracking-tight leading-snug group-hover:text-[#ba8ffa] transition-colors">
       {title}
     </h3>
     <div className="flex items-center justify-between pt-4 border-t border-white/5">
@@ -415,3 +431,4 @@ const ResourceCard = ({ title, type, date, color }) => (
 );
 
 export default Dashboard;
+

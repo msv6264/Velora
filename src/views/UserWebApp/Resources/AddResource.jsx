@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
+import { RESOURCE_CATEGORIES } from "@/constants/library";
 
 const AddResource = () => {
   const router = useRouter();
@@ -42,12 +43,7 @@ const AddResource = () => {
     formData.url.trim() !== "" && formData.title.trim() !== "";
 
   // Categories with matching icons
-  const categories = [
-    { id: "Article", icon: <FileText size={18} /> },
-    { id: "Video", icon: <TvMinimalPlay size={18} /> },
-    { id: "Repository", icon: <GitBranch size={18} /> },
-    { id: "Tool", icon: <Layout size={18} /> },
-  ];
+  const categories = RESOURCE_CATEGORIES;
 
   const collections = [
     "Research",
@@ -168,8 +164,8 @@ const AddResource = () => {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white/[0.02] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-12 shadow-[0_25px_100px_rgba(0,0,0,0.5)]">
-          <form className="space-y-10" onSubmit={handleSave}>
+        <div className="bg-white/[0.02] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-6 sm:p-12 shadow-[0_25px_100px_rgba(0,0,0,0.5)]">
+          <form className="space-y-8 sm:space-y-10" onSubmit={handleSave}>
             {/* URL Input Section */}
             <div className="space-y-4">
               <div className="flex justify-between items-center px-1">
@@ -216,20 +212,20 @@ const AddResource = () => {
             <div
               className={`overflow-hidden transition-all duration-700 ${scanComplete ? "max-h-64 opacity-100 mb-10" : "max-h-0 opacity-0"}`}
             >
-              <div className="p-6 rounded-[2rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 flex gap-6 items-center">
-                <div className="w-24 h-24 rounded-2xl bg-white/5 flex items-center justify-center text-[#ba8ffa]">
+              <div className="p-6 rounded-[2rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 flex flex-col sm:flex-row gap-6 items-center">
+                <div className="w-24 h-24 rounded-2xl bg-white/5 flex items-center justify-center text-[#ba8ffa] shrink-0">
                   {categories.find((c) => c.id === formData.category)?.icon || (
                     <FileText size={40} />
                   )}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 text-center sm:text-left">
                   <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
                     Preview Scraped
                   </div>
                   <h4 className="text-xl font-bold text-white mb-2 leading-tight">
                     {formData.title || "Analyzing..."}
                   </h4>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 justify-center sm:justify-start">
                     <span className="px-2 py-0.5 rounded-md bg-[#ba8ffa]/10 text-[#ba8ffa] text-[10px] font-black uppercase tracking-tighter border border-[#ba8ffa]/20">
                       {formData.category}
                     </span>
@@ -301,7 +297,7 @@ const AddResource = () => {
               <label className="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em] px-1">
                 Verify Category
               </label>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
@@ -376,8 +372,8 @@ const AddResource = () => {
         </div>
 
         {/* Intelligence Message */}
-        <div className="mt-12 p-8 rounded-[2.5rem] bg-[#ba8ffa]/5 border border-[#ba8ffa]/10 backdrop-blur-md flex items-center gap-6">
-          <div className="w-14 h-14 rounded-2xl bg-[#ba8ffa]/10 flex items-center justify-center text-[#ba8ffa] animate-pulse">
+        <div className="mt-12 p-5 sm:p-8 rounded-[2.5rem] bg-[#ba8ffa]/5 border border-[#ba8ffa]/10 backdrop-blur-md flex items-center gap-6">
+          <div className="w-14 h-14 rounded-2xl bg-[#ba8ffa]/10 flex items-center justify-center text-[#ba8ffa] shrink-0 animate-pulse">
             <Sparkles size={24} />
           </div>
           <div>

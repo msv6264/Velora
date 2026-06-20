@@ -19,8 +19,10 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
+  Menu,
+  X,
 } from "lucide-react";
-import { getUserData, logoutUser, updateAuthData, updateUserMetaData } from "@/src/services/auth";
+import { getUserData, logoutUser, updateAuthData, updateUserMetaData } from "@/services/auth";
 
 const logo = "/logo.png";
 
@@ -28,7 +30,7 @@ const logo = "/logo.png";
 const NavItem = ({ icon, label, active = false, onClick }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 ${
+    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 cursor-pointer ${
       active
         ? "bg-[#ba8ffa] text-black font-bold shadow-[0_0_20px_rgba(186,143,250,0.2)]"
         : "text-gray-500 hover:text-white hover:bg-white/5"
@@ -41,7 +43,7 @@ const NavItem = ({ icon, label, active = false, onClick }) => (
 
 /* ─────────────────────────── Section wrapper ─────────────────────────── */
 const Section = ({ icon, title, children }) => (
-  <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 mb-6">
+  <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-5 sm:p-8 mb-6">
     <div className="flex items-center gap-3 mb-6">
       <div className="p-2.5 rounded-xl bg-[#ba8ffa]/10 text-[#ba8ffa]">{icon}</div>
       <h2 className="text-lg font-semibold text-white">{title}</h2>
@@ -66,9 +68,18 @@ const Toggle = ({ checked, onChange }) => (
   </button>
 );
 
-/* ═══════════════════════════════════════════════════════════════ */
+/* ─────────────────────────── SettingsPage ─────────────────────────── */
 const SettingsPage = () => {
   const router = useRouter();
+
+  /* ── sidebar state ── */
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
 
   /* ── user data ── */
   const [user, setUser] = useState(null);
@@ -166,31 +177,67 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white font-outfit flex overflow-hidden">
+    <div className="min-h-screen bg-[#030303] text-white font-outfit flex overflow-hidden relative">
+
+      {/* Mobile Backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden transition-all duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* ─── Sidebar ─── */}
-      <aside className="w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col">
-        <div className="p-8 flex items-center gap-3">
-          <div
-            className="w-10 h-10 bg-[#ba8ffa]/10 rounded-xl flex items-center justify-center border border-[#ba8ffa]/20 overflow-hidden p-2 cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            <img src={logo} alt="Velora Logo" className="w-full h-full object-contain" />
+      <aside className={`fixed md:static inset-y-0 left-0 z-40 w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col transition-all duration-500 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 overflow-y-auto`}>
+        <div className="p-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 bg-[#ba8ffa]/10 rounded-xl flex items-center justify-center border border-[#ba8ffa]/20 overflow-hidden p-2 cursor-pointer"
+              onClick={() => {
+                setIsSidebarOpen(false);
+                router.push("/");
+              }}
+            >
+              <img src={logo} alt="Velora Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight">Velora</span>
           </div>
-          <span className="text-2xl font-bold tracking-tight">Velora</span>
+
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 text-gray-500 hover:text-white md:hidden focus:outline-none"
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-4">
-          <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard"   onClick={() => router.push("/dashboard")} />
-          <NavItem icon={<BookOpen size={20} />}        label="My Library"  onClick={() => router.push("/library")} />
-          <NavItem icon={<Sparkles size={20} />}        label="Rediscovery" onClick={() => router.push("/rediscovery")} />
-          <NavItem icon={<FolderOpen size={20} />}      label="Collections" onClick={() => router.push("/collections")} />
+          <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard"   onClick={() => {
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+            router.push("/dashboard");
+          }} />
+          <NavItem icon={<BookOpen size={20} />}        label="My Library"  onClick={() => {
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+            router.push("/library");
+          }} />
+          <NavItem icon={<Sparkles size={20} />}        label="Rediscovery" onClick={() => {
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+            router.push("/rediscovery");
+          }} />
+          <NavItem icon={<FolderOpen size={20} />}      label="Collections" onClick={() => {
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+            router.push("/collections");
+          }} />
 
           <div className="pt-8 pb-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">
             System
           </div>
           <NavItem icon={<Settings size={20} />} label="Settings" active />
-          <NavItem icon={<LogOut size={20} />}   label="Log out"  onClick={handleLogout} />
+          <NavItem icon={<LogOut size={20} />}   label="Log out"  onClick={() => {
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+            handleLogout();
+          }} />
         </nav>
       </aside>
 
@@ -200,11 +247,23 @@ const SettingsPage = () => {
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#ba8ffa]/5 blur-[150px] rounded-full pointer-events-none" />
 
         {/* header */}
-        <header className="sticky top-0 z-10 bg-black/50 backdrop-blur-xl border-b border-white/5 px-10 py-6">
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-          <p className="text-gray-500 text-sm font-spectral italic mt-0.5">
-            Manage your account and preferences
-          </p>
+        <header className="sticky top-0 z-10 bg-black/50 backdrop-blur-xl border-b border-white/5 px-6 sm:px-10 py-6 flex items-center gap-4 justify-between md:justify-start">
+          <div className="flex items-center gap-3">
+            {/* Sidebar toggle button (Mobile only) */}
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-white md:hidden focus:outline-none"
+              aria-label="Toggle Sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+              <p className="text-gray-500 text-sm font-spectral italic mt-0.5">
+                Manage your account and preferences
+              </p>
+            </div>
+          </div>
         </header>
 
         <div className="p-10 max-w-3xl mx-auto">
