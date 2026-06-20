@@ -181,3 +181,29 @@ export async function updateCollections(
         return { data: null, error: err };
     }
 }
+
+export async function deleteCollections(collectionId) {
+    try {
+        const { data, error } = await supabase 
+        .from ("collections") 
+        .delete() 
+        .eq("id", collectionId) 
+        .select();
+
+        if (error) {
+            return { data: null, error };
+        }
+
+        const { data2, error2 } = await supabase
+        .from("resource_collections")
+        .delete()
+        .eq("collection_id")
+
+        if(error2){
+            return { data: null, error: error2 };
+        }
+
+    } catch (error) {
+        return { data: null, error: error };
+    }
+}

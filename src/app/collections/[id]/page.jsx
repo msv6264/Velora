@@ -1,4 +1,4 @@
-import PageComponent from "@/views/UserWebApp/Collections/Collections";
+import PageComponent from "@/components/collections/CollectionDetail";
 
 export default function Page(props) {
   return <PageComponent {...props} />;
