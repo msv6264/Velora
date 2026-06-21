@@ -97,7 +97,8 @@ const Insights = () => {
             icon={<Zap size={24} />} 
             color="bg-[#ba8ffa]" 
           />
-          <StatCard 
+          {/* TO:DO - PAUSED TILL MVP */}
+          {/* <StatCard 
             title="Retention Rate" 
             value="84%" 
             change="+5%" 
@@ -111,7 +112,7 @@ const Insights = () => {
             icon={<Activity size={24} />} 
             color="bg-[#ba8ffa]" 
             description="Calculation: (Items Revisited / Total Saved) × 100. Measures your balance of discovery vs. hoarding."
-          />
+          /> */}
           <StatCard 
             title="Rediscovery Streak" 
             value="15 Days" 

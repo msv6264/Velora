@@ -150,7 +150,8 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="grid grid-cols-2 gap-4">
+            {/* TO-DO: IN VERSION - 2, connect to google and github */}
+          {/* <div className="grid grid-cols-2 gap-4">
             <button className="flex items-center justify-center gap-3 bg-white/5 border border-white/5 rounded-2xl py-3.5 text-white hover:bg-white/10 hover:border-white/10 transition-all duration-300">
               <CircleUser size={20} />
               <span className="text-sm font-medium">Google</span>
@@ -159,7 +160,7 @@ const Login = () => {
               <Code size={20} />
               <span className="text-sm font-medium">GitHub</span>
             </button>
-          </div>
+          </div> */}
 
         </div>
 

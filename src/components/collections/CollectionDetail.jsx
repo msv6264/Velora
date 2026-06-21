@@ -8,17 +8,18 @@ import { Plus } from "lucide-react";
 
 import CollectionDetailHeader from "./CollectionDetailHeader";
 import CollectionDetailToolbar from "./CollectionDetailToolbar";
-import CollectionGridCard from "./CollectionGridCard";
-import CollectionListCard from "./CollectionListCard";
 import CollectionResourceEditModal from "./CollectionResourceEditModal";
+import CollectionGalleryCard from "./CollectionGalleryCard";
+import CollectionPathCard from "./CollectionPathCard";
+import AddMilestoneModal from "./AddMilestoneModal";
 
-import { getCollections, getRelations } from "@/services/collections";
+import { getCollections, getRelations, addRelations } from "@/services/collections";
 import { getResources, updateResource, deleteResource } from "@/services/resources";
 
 const CollectionDetail = () => {
   const router = useRouter();
   const { id } = useParams();
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("path");
   const [activeMenu, setActiveMenu] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -30,9 +31,13 @@ const CollectionDetail = () => {
   const [formType, setFormType] = useState("");
   const [formStatus, setFormStatus] = useState("not_started");
 
+  // Add Milestone Modal State
+  const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
+
   // Data State
   const [collectionInfo, setCollectionInfo] = useState(null);
   const [resources, setResources] = useState([]);
+  const [allResources, setAllResources] = useState([]);
 
   React.useEffect(() => {
     async function loadData() {
@@ -58,10 +63,12 @@ const CollectionDetail = () => {
         if (relError) throw new Error("Failed to load relations");
         const resourceIds = (relData || []).map((r) => r.resource_id);
 
-        const { data: allResources, error: resError } = await getResources();
+        const { data: allRes, error: resError } = await getResources();
         if (resError) throw new Error("Failed to load resources");
 
-        const collectionResources = (allResources || []).filter((r) =>
+        setAllResources(allRes || []);
+
+        const collectionResources = (allRes || []).filter((r) =>
           resourceIds.includes(r.id),
         );
         setResources(collectionResources);
@@ -119,6 +126,23 @@ const CollectionDetail = () => {
     await deleteResource(resourceId);
   };
 
+  const handleAddResources = async (selectedIds) => {
+    try {
+      const { data, error } = await addRelations(id, selectedIds);
+      if (error) throw error;
+
+      const newlyAdded = allResources.filter((r) => selectedIds.includes(r.id));
+      setResources((prev) => [...prev, ...newlyAdded]);
+      setShowAddMilestoneModal(false);
+    } catch (err) {
+      console.error("Failed to add resources: ", err);
+    }
+  };
+
+  const remainingResources = allResources.filter(
+    (r) => !resources.some((existing) => existing.id === r.id)
+  );
+
   if (isLoading || !collectionInfo) {
     return (
       <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center font-outfit">
@@ -154,42 +178,69 @@ const CollectionDetail = () => {
         {/* Resources Grid/List */}
         <div
           className={
-            viewMode === "grid"
+            viewMode === "gallery"
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              : "space-y-4"
+              : "flex flex-col gap-8"
           }
         >
-          {resources.map((res) =>
-            viewMode === "grid" ? (
-              <CollectionGridCard
+          {resources.map((res, index) =>
+            viewMode === "gallery" ? (
+              <CollectionGalleryCard
                 key={res.id}
                 res={res}
                 activeMenu={activeMenu}
                 toggleMenu={toggleMenu}
                 handleEditClick={handleEditClick}
                 handleDeleteResource={handleDeleteResource}
+                collectionColor={collectionInfo.color}
               />
             ) : (
-              <CollectionListCard
+              <CollectionPathCard
                 key={res.id}
                 res={res}
+                index={index}
                 activeMenu={activeMenu}
                 toggleMenu={toggleMenu}
                 handleEditClick={handleEditClick}
                 handleDeleteResource={handleDeleteResource}
+                collectionColor={collectionInfo.color}
               />
             )
           )}
 
           {/* Add Item Placeholder */}
-          <div className="p-6 rounded-[2rem] border-2 border-dashed border-white/5 hover:border-[#ba8ffa]/30 transition-all duration-500 flex flex-col items-center justify-center gap-4 group cursor-pointer aspect-[4/3] md:aspect-auto">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gray-700 group-hover:text-[#ba8ffa] transition-colors">
-              <Plus size={24} />
+          {viewMode === "gallery" ? (
+            <div 
+              onClick={() => setShowAddMilestoneModal(true)}
+              className="p-6 rounded-[2.5rem] border-2 border-dashed border-white/5 hover:border-white/20 transition-all duration-500 flex flex-col items-center justify-center gap-4 group cursor-pointer h-80 bg-white/[0.01]"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:scale-110 transition-all duration-500 shadow-xl">
+                <Plus size={24} />
+              </div>
+              <span className="text-gray-500 font-bold tracking-tight text-sm group-hover:text-white uppercase transition-colors">
+                Add to Collection
+              </span>
             </div>
-            <span className="text-gray-600 font-bold tracking-tight text-sm group-hover:text-white">
-              Add to Collection
-            </span>
-          </div>
+          ) : (
+            <div 
+              onClick={() => setShowAddMilestoneModal(true)}
+              className="relative flex gap-8 group cursor-pointer"
+            >
+              {/* Node / Number */}
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-[#0a0a0a] border-2 border-dashed border-white/10 flex items-center justify-center text-gray-500 group-hover:scale-110 transition-all duration-500 group-hover:border-white/30 group-hover:text-white">
+                  <Plus size={20} />
+                </div>
+              </div>
+
+              {/* Card Content */}
+              <div className="flex-1 bg-[#0a0a0a] border border-dashed border-white/10 rounded-[2.5rem] p-8 hover:bg-white/[0.01] hover:border-white/20 transition-all duration-500 flex items-center gap-4">
+                <span className="text-gray-500 font-bold tracking-tight text-sm group-hover:text-white uppercase transition-colors">
+                  Add new milestone / content
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -204,6 +255,14 @@ const CollectionDetail = () => {
         formStatus={formStatus}
         setFormStatus={setFormStatus}
         handleSaveResource={handleSaveResource}
+      />
+
+      {/* Add Milestone Modal */}
+      <AddMilestoneModal
+        isOpen={showAddMilestoneModal}
+        onClose={() => setShowAddMilestoneModal(false)}
+        remainingResources={remainingResources}
+        onAddResources={handleAddResources}
       />
     </div>
   );

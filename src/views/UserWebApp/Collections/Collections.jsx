@@ -193,7 +193,7 @@ const Collections = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#030303] text-white font-outfit p-8 relative overflow-hidden"
+      className="min-h-screen bg-[#030303] text-white font-outfit p-4 sm:p-8 relative overflow-hidden"
       onClick={() => setActiveMenu(null)}
     >
       <NeuralBg side="right" />
@@ -201,11 +201,11 @@ const Collections = () => {
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
-        <header className="flex items-center justify-between mb-16">
-          <div className="flex items-center gap-6">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 sm:mb-16">
+          <div className="flex items-center gap-4 sm:gap-6">
             <button
               onClick={() => router.push("/dashboard")}
-              className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-all group"
+              className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-all group shrink-0"
             >
               <ArrowLeft
                 size={24}
@@ -213,8 +213,8 @@ const Collections = () => {
               />
             </button>
             <div>
-              <h1 className="text-4xl font-bold tracking-tight">Collections</h1>
-              <p className="text-gray-500 font-spectral italic text-lg">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Collections</h1>
+              <p className="text-gray-500 font-spectral italic text-sm sm:text-lg">
                 Organized paths to intentional learning.
               </p>
             </div>
@@ -222,7 +222,7 @@ const Collections = () => {
 
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#ba8ffa] text-black hover:shadow-[0_0_25px_rgba(186,143,250,0.3)] transition-all group"
+            className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-[#ba8ffa] text-black hover:shadow-[0_0_25px_rgba(186,143,250,0.3)] transition-all group w-full sm:w-auto"
           >
             <FolderPlus size={20} />
             <span className="font-bold tracking-tight">New Collection</span>
