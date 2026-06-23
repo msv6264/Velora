@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { MoreVertical, Pencil, Trash2, Link2, ChevronRight } from "lucide-react";
+import { handleRevisit } from "@/utils/updateRevisit";
 
 export const STATUS_CONFIG = {
   not_started: { label: "Not Started", color: "from-gray-500/20 to-gray-500/5 text-gray-400 border-gray-500/20", dot: "bg-gray-500" },
@@ -46,7 +47,7 @@ const CollectionPathCard = ({ res, index, activeMenu, toggleMenu, handleEditClic
               </span>
             </div>
             
-            <a href={res.url} target="_blank" rel="noopener noreferrer" className="block text-3xl font-bold text-white group-hover/card:text-white transition-colors mb-3 tracking-tight">
+            <a href={res.url} onClick={() => handleRevisit(res.id)} target="_blank" rel="noopener noreferrer" className="block text-3xl font-bold text-white group-hover/card:text-white transition-colors mb-3 tracking-tight">
               {res.title}
             </a>
             <div className="flex items-center gap-3 text-sm text-gray-500 font-spectral italic group-hover/card:text-gray-400 transition-colors">
@@ -88,7 +89,7 @@ const CollectionPathCard = ({ res, index, activeMenu, toggleMenu, handleEditClic
               )}
             </div>
             
-            <a href={res.url} target="_blank" rel="noopener noreferrer" className="mt-6 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover/card:bg-white group-hover/card:text-black transition-all hover:scale-110 shadow-lg">
+            <a href={res.url} onClick={() => handleRevisit(res.id)} target="_blank" rel="noopener noreferrer" className="mt-6 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover/card:bg-white group-hover/card:text-black transition-all hover:scale-110 shadow-lg">
               <ChevronRight size={24} />
             </a>
           </div>

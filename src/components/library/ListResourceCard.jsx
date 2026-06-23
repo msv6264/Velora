@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { STATUS_CONFIG } from "@/constants/library";
+import { handleRevisit } from "@/utils/updateRevisit";
 
 const ListResourceCard = ({
   resource,
@@ -37,6 +38,7 @@ const ListResourceCard = ({
           
           <a
             href={resource.url}
+            onClick={() => handleRevisit(resource.id)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-lg font-bold truncate group-hover:text-[#ba8ffa] hover:text-[#8c5ad8]! transition-colors cursor-pointer"
@@ -105,6 +107,7 @@ const ListResourceCard = ({
         
         <a
           href={resource.url}
+          onClick={() => handleRevisit(res.id)}
           target="_blank"
           rel="noopener noreferrer"
           className="p-2 text-gray-600 hover:text-[#ba8ffa] transition-colors"

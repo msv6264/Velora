@@ -2,6 +2,7 @@
 import React from "react";
 import { MoreVertical, ExternalLink, Pencil, Trash2, Globe, Play, FileText } from "lucide-react";
 import { STATUS_CONFIG } from "./CollectionPathCard";
+import { handleRevisit } from "@/utils/updateRevisit";
 
 const getIconForType = (type) => {
   switch (type?.toLowerCase()) {
@@ -68,7 +69,7 @@ const CollectionGalleryCard = ({ res, activeMenu, toggleMenu, handleEditClick, h
             </span>
           </div>
 
-          <a href={res.url} target="_blank" rel="noopener noreferrer" className="block text-2xl font-bold tracking-tight text-white group-hover:text-white transition-colors line-clamp-3 cursor-pointer mb-2">
+          <a href={res.url} onClick={() => {handleRevisit(res.id)}} target="_blank" rel="noopener noreferrer" className="block text-2xl font-bold tracking-tight text-white group-hover:text-white transition-colors line-clamp-3 cursor-pointer mb-2">
             {res.title}
           </a>
           
