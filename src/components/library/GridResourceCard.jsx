@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { STATUS_CONFIG } from "@/constants/library";
+import { handleRevisit } from "@/utils/updateRevisit";
 
 const GridResourceCard = ({
   resource,
@@ -17,7 +18,7 @@ const GridResourceCard = ({
   handleEditResource,
   setResourceToDelete,
 }) => {
-  console.log("resource: ", resource);
+  // console.log("resource: ", resource);
   return (
     <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/10 transition-all duration-500 group relative">
       <div
@@ -68,7 +69,8 @@ const GridResourceCard = ({
       </div>
 
       <a
-        href={resource.url}
+        href={resource.url}  
+        onClick={() => handleRevisit(resource.id)}
         target="_blank"
         rel="noopener noreferrer"
         className="block text-xl font-bold mb-4 tracking-tight leading-snug group-hover:text-[#ba8ffa] hover:text-[#8c5ad8]! transition-colors h-14 line-clamp-2 cursor-pointer"
