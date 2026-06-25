@@ -1,67 +1,70 @@
-import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
 
-export async function middleware(req) {
-    const path = req.nextUrl.pathname;
+export async function middleware(request) {
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
-    const publicRoutes = [
-        "/",
-        "/login",
-        "/signup",
-    ];
-
-    const protectedRoutes = [
-        "/dashboard",
-        "/library",
-        "/settings",
-        "/collections",
-        "/rediscovery",
-    ];
-
-    const response = NextResponse.next();
-
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-        {
-            cookies: {
-                getAll() {
-                    return req.cookies.getAll();
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        req.cookies.set(name, value);
-                        response.cookies.set(name, value, options);
-                    });
-                },
-            },
-        }
-    )
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // User is trying to access a protected page without logging in
-    if (protectedRoutes.includes(path) && !user) {
-        return NextResponse.redirect(new URL("/login", req.url));
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
     }
+  );
 
-    // Logged-in user tries to visit login/signup again
-    if ((path === "/login" || path === "/signup") && user) {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    // Allow the request to continue
-    return response;
+  const protectedRoutes = [
+    "/dashboard",
+    "/library",
+    "/settings",
+    "/collections",
+    "/rediscovery",
+    "/insights",
+    "/add-resource"
+  ];
+
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  );
+
+  if (isProtectedRoute && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect logged-in users away from auth pages
+  if (user && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup" || request.nextUrl.pathname === "/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  return supabaseResponse;
 }
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/library/:path*",
-    "/settings/:path*",
-    "/collections/:path*",
-    "/rediscovery/:path*",
-    "/login",
-    "/signup",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
