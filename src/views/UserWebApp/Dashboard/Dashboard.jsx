@@ -18,10 +18,11 @@ import {
   FolderOpen,
   Filter,
   XCircle,
-  Menu,
+  Menu, BrainCircuit,
   X,
 } from "lucide-react";
 import { getUserData } from "@/services/auth";
+import { getResourceCnt, getVisitedResourcesCnt } from "@/services/dashboard.service";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -30,12 +31,29 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [clipboardLink, setClipboardLink] = useState(null);
   const [userName, setUserName] = useState(null);
+  const [resourceCount, setResourceCount] = useState(0);
+  const [visitedCount, setVisitedCount] = useState(0);
+  const [reDiscRate, setReDiscRate] = useState(0);
 
   // Initialize sidebar based on screen width
   useEffect(() => {
     if (window.innerWidth >= 768) {
       setIsSidebarOpen(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchCnts = async () => {
+      const resCnt = await getResourceCnt();
+      const visCnt = await getVisitedResourcesCnt();
+
+      setResourceCount(typeof resCnt === 'number' ? resCnt : 0);
+      setVisitedCount(typeof visCnt === 'number' ? visCnt : 0);
+
+      resCnt > 0 ? (visCnt / resCnt) * 100 : 0;
+      setReDiscRate(Math.round(calc));
+    };
+    fetchCnts();
   }, []);
 
   const navItems = [
@@ -113,13 +131,20 @@ const Dashboard = () => {
   const stats = [
     {
       label: "Total Saved",
-      value: "128",
+      value: resourceCount,
       icon: <Bookmark className="text-[#ba8ffa]" size={20} />,
+      href: "/library",
     },
     {
       label: "Revisited",
-      value: "42",
+      value: visitedCount,
       icon: <Clock className="text-[#8791fe]" size={20} />,
+      href: "/rediscovery",
+    },
+    {
+      label: "Rediscovery Rate",
+      value: `${reDiscRate.toFixed(0)}%`,
+      icon: <BrainCircuit className="text-[#8791fe]" size={20} />,
     },
       {/* TO:DO - PAUSED TILL MVP */}
     // {
@@ -261,7 +286,8 @@ const Dashboard = () => {
             ))}
         </nav>
 
-        <div className="p-6">
+            {/* TO-DO: view insigts page */}
+        {/* <div className="p-6">
           <div className="p-5 rounded-3xl bg-white/3 border border-white/5 backdrop-blur-xl">
             <p className="text-sm text-gray-400 mb-4 font-spectral italic">
               You've rediscovered 5 items this week!
@@ -276,7 +302,7 @@ const Dashboard = () => {
               View Insights
             </button>
           </div>
-        </div>
+        </div> */}
       </aside>
 
       {/* Main Content */}
@@ -341,7 +367,8 @@ const Dashboard = () => {
             {stats.map((stat, i) => (
               <div
                 key={i}
-                className="p-6 rounded-3xl sm:rounded-4xl bg-white/2 border border-white/5 backdrop-blur-xl hover:bg-white/5 transition-all group"
+                className={`p-6 rounded-3xl sm:rounded-4xl bg-white/2 border border-white/5 backdrop-blur-xl hover:bg-white/5 transition-all group ${stat.href ? 'cursor-pointer' : ''}`}
+                onClick={() => stat.href && router.push(stat.href)}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 rounded-xl bg-white/5 group-hover:scale-110 transition-all">
